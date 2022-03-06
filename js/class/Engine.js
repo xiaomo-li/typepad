@@ -99,7 +99,11 @@ define([
         } else if (e.key === "Escape") {
           this.pause();
           e.preventDefault();
-        } else if (
+        }
+      };
+      typingPad.onkeyup = (e) => {
+        e.preventDefault();
+        if (
           Reg.KEYS.az.test(e.key) &&
           !e.ctrlKey &&
           !e.metaKey &&
@@ -109,12 +113,9 @@ define([
         ) {
           this.start();
         }
-      };
-      typingPad.onkeyup = (e) => {
-        e.preventDefault();
         if (!this.isFinished && this.isStarted) {
           this.keyCount.countKeys(e);
-          // this.compare();
+          this.compare();
           // 末字时结束的时候
           if (typingPad.value.length >= this.currentWords.length) {
             if (typingPad.value === this.currentWords) {
@@ -184,7 +185,6 @@ define([
       // Repeat Monitor
       $("#repeatCountTotal").innerText = this.config.repeatCountTotal;
       $("#repeatCountCurrent").innerText = this.config.repeatCountCurrent;
-
       this.currentOriginWords = this.config.article.split("");
       if (this.config.articleType === ArticleType.word) {
         // CET 时
@@ -376,6 +376,7 @@ define([
         default:
           break;
       }
+      this.lastTypedWords = "";
       this.config.save();
       this.applyConfig();
       this.changePerCount();
@@ -646,7 +647,6 @@ define([
             let originWords = arrayOrigin
               .slice(item.start, item.words.length + item.start)
               .join("");
-            this.wrong = wordsWrong.concat(originWords);
             html = html + `<span class="wrong">${originWords}</span>`;
             break;
           case ResultType.pending:
@@ -682,8 +682,6 @@ define([
     }
 
     getWrongWords() {
-      //this.lastTypedWords 上一次打得字
-      //typingPad.value; //自己打的尾字
       let arrayOrigin = this.currentWords.split(""); //系统出的尾字
       let words = "";
       if (this.lastTypedWords !== "") {
@@ -697,7 +695,11 @@ define([
           }
         }
       }
-      this.config.wrongContent += words;
+      let a = words.replace(
+        /\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?|\。|\?|\！|\？|\“|\”|\’|\‘|\，|\》|\《|\、/g,
+        ""
+      );
+      this.config.wrongContent += a;
       this.lastTypedWords = typingPad.value;
     }
 
@@ -759,7 +761,9 @@ define([
         return b.num - a.num;
       });
       let innerHTML = '<div class="title">错字排行<div>';
+      let wrongwords = "";
       for (var key in this.config.wrongWords) {
+        wrongwords += this.config.wrongWords[key].word;
         innerHTML +=
           '<div class="key-info-item wrong"><div>' +
           this.config.wrongWords[key].word +
@@ -767,34 +771,26 @@ define([
           this.config.wrongWords[key].num +
           "</p></div></div>";
       }
-
       $(".wrong-info").innerHTML = innerHTML;
+      this.wrong = wrongwords;
     }
 
     // 下载txt
     downLoad() {
-      let file = new File([this.config.wrongContent], "错字练习" + ".txt", {
+      let file = new File([this.wrong], "错字练习" + ".txt", {
         type: "text/plain;charset=utf-8",
       });
       saveAs(file);
     }
-    //上传文本
-    upDate(file) {
-      let fr = new FileReader(file[0]);
-      fr.onload = function (e) {
-        template.innerText = e.target.result;
-      };
-      fr.readAsText(file[0]);
-    }
 
-    clearWrong() {
-      Article.hard.content = this.config.wrongContent = "";
-      if (this.config.articleName == "错字练习") {
-        template.innerText = "";
-      }
-      $(".wrong-info").innerHTML = '<div class="title">错字排行<div>';
-      this.config.save();
-    }
+    // clearWrong() {
+    //   Article.hard.content = this.config.wrongContent = "";
+    //   if (this.config.articleName == "错字练习") {
+    //     template.innerText = "";
+    //   }
+    //   $(".wrong-info").innerHTML = '<div class="title">错字排行<div>';
+    //   this.config.save();
+    // }
 
     getCurrentCETWordTranslation(length) {
       let tempString = "";
@@ -915,16 +911,6 @@ define([
     }
     // 当前段打完
     finish() {
-      //删除打完的错字
-      if (this.config.articleName == "错字练习") {
-        let l1 = this.currentWords.length;
-        let l2 = this.config.wrongContent.length;
-        let l3 = this.config.article.length;
-        this.config.wrongContent = this.config.wrongContent.slice(l1, l2);
-        this.config.article = this.config.article.slice(l1, l3);
-        this.config.save();
-        this.applyConfig();
-      }
       Article.hard.content = this.config.wrongContent;
       this.isStarted = false;
       this.isFinished = true;
@@ -941,7 +927,26 @@ define([
         1000 *
         60
       ).toFixed(2);
+      let allKeyCount = this.keyCount.all - this.keyCount.function;
+      if (this.correctWordsCount) {
+        this.record.codeLength = (allKeyCount / this.correctWordsCount).toFixed(
+          2
+        );
+      }
       this.database.insert(this.record, this.config);
+      //练习模式——删除打完的错字
+      this.lastTypedWords = "";
+      if (this.config.articleName == "错字练习") {
+        let l1 = this.currentWords.length;
+        let l2 = this.config.wrongContent.length;
+        let l3 = this.config.article.length;
+        this.config.wrongContent = this.config.wrongContent.slice(l1, l2);
+        this.config.article = this.config.article.slice(l1, l3);
+        this.currentOriginWords = this.currentOriginWords.slice(l1, l3);
+        this.config.chapter = 0;
+        this.config.save();
+        this.applyConfig();
+      }
       if (this.config.isAutoNext) {
         // 自动发文
         if (this.config.isAutoRepeat) {
@@ -975,7 +980,6 @@ define([
       } else {
         $(".time").classList.remove("text-black");
       }
-
       // KEY COUNT
       for (let type in this.keyCount) {
         $(`.word-${type} p`).innerText = this.keyCount[type];
@@ -985,7 +989,6 @@ define([
 
       // 更新当前重复次数
       $("#repeatCountCurrent").innerText = this.config.repeatCountCurrent;
-
       // SPEED
       if (!this.isStarted && !this.isFinished) {
         $(".speed").innerText = "--";
@@ -1001,12 +1004,10 @@ define([
         ).toFixed(2);
         $(".speed").innerText = this.record.speed;
         $(".btn-speed").innerText = this.record.speed;
-
         // key count
         let allKeyCount = this.keyCount.all - this.keyCount.function;
         this.record.hitRate = ((allKeyCount / this.duration) * 1000).toFixed(2);
         $(".count-key-rate").innerText = this.record.hitRate;
-
         // code length
         if (this.correctWordsCount) {
           this.record.codeLength = (

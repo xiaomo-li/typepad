@@ -1499,21 +1499,3 @@ body {
     display: none;
   }
 }
-.up {
-  position: relative;
-}
-.up input {
-  position: absolute;
-  opacity: 0;
-  left: 0;
-  top: 0;
-  width: 69px;
-  height: 25px;
-}
-.wrong-info {
-  max-height: 250px;
-  overflow: auto;
-}
-.wrong-info .title {
-  text-align: center;
-}
