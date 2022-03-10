@@ -56,6 +56,7 @@ define([
       Article.hard.content = this.config.wrongContent;
       this.showWrongWords();
       this.lastTypedWords = "";
+      this.speedValue = 4;
 
       // 按键过滤器
       /****
@@ -133,6 +134,7 @@ define([
           // 末字时结束的时候
           if (typingPad.value.length >= this.currentWords.length) {
             if (typingPad.value === this.currentWords) {
+              this.keyCount.plusOne(); // 最终结束的时候，上屏的那个按钮是无法被记录到 keyCount 中的，所以需要手动 +1
               this.finish();
             }
           }
@@ -148,6 +150,7 @@ define([
       $("input[type=checkbox]#darkMode").checked = this.config.darkMode;
       $("input[type=checkbox]#autoNext").checked = this.config.isAutoNext;
       $("input[type=checkbox]#autoRepeat").checked = this.config.isAutoRepeat;
+      $("input[type=checkbox]#challenge").checked = this.config.challenge;
       $("input[type=checkbox]#shuffleRepeat").checked =
         this.config.isShuffleRepeat;
       $("input[type=checkbox]#bigCharacter").checked =
@@ -160,6 +163,7 @@ define([
         item.checked = item.value === this.config.count;
       });
       $("select#article").value = this.config.articleIdentifier;
+      $("select#speed").value = this.config.keystroke;
 
       // English Mode
       if (this.config.isInEnglishMode) {
@@ -189,6 +193,14 @@ define([
       if (this.config.articleType === ArticleType.word) {
         // CET 时
         this.arrayWordAll = Article.CET4.getWordsArray();
+        if (this.config.count === "ALL") {
+          this.arrayWordDisplaying = this.arrayWordAll;
+        } else {
+          this.arrayWordDisplaying = this.arrayWordAll.slice(
+            Number(this.config.count) * (this.config.chapter - 1),
+            Number(this.config.count) * this.config.chapter
+          ); // 截取当前需要显示的数组段
+        }
         this.arrayWordDisplaying = this.arrayWordAll.slice(
           Number(this.config.count) * (this.config.chapter - 1),
           Number(this.config.count) * this.config.chapter
@@ -466,6 +478,18 @@ define([
       this.config.save();
     }
 
+    challenge() {
+      this.config.challenge = $("#challenge").checked;
+      if (this.config.challenge) {
+        $("#chooseSpeed").classList.remove("hidden");
+      } else {
+        $("#chooseSpeed").classList.add("hidden");
+      }
+      $("#autoNext").checked = true;
+      this.autoNext();
+      this.config.save();
+    }
+
     // 更新重复状态
     setRepeatStatus(config) {
       if (config.isAutoRepeat) {
@@ -509,10 +533,11 @@ define([
           return item.word + "\t" + item.translation;
         });
         this.config.article = tempArrayWordAll.join("\t\t");
+        // 当为全文时，this.config.count 非数字，而是 'All'，就需要处理一下
         let count =
           this.config.count === "ALL"
             ? this.arrayWordAll.length
-            : this.config.count;
+            : Number(this.config.count);
         this.arrayWordDisplaying = this.arrayWordAll.slice(0, count); // 截取当前需要显示的数组段
         let arrayCurrentWord = this.arrayWordDisplaying.map((item) => {
           return item.word;
@@ -525,9 +550,11 @@ define([
             )
           : Article[this.config.articleIdentifier].content.split("");
         this.config.article = this.currentOriginWords.join("");
-        this.currentWords = this.currentOriginWords
-          .slice(0, Number(this.config.count))
-          .join("");
+        let count =
+          this.config.count === "ALL"
+            ? this.arrayWordAll.length
+            : Number(this.config.count);
+        this.currentWords = this.currentOriginWords.slice(0, count).join("");
       }
 
       this.config.chapter = 1;
@@ -933,6 +960,7 @@ define([
           2
         );
       }
+      this.record.hitRate = ((allKeyCount / this.duration) * 1000).toFixed(2);
       this.database.insert(this.record, this.config);
       //练习模式——删除打完的错字
       this.lastTypedWords = "";
@@ -946,6 +974,13 @@ define([
         this.config.chapter = 0;
         this.config.save();
         this.applyConfig();
+      }
+      if (this.record.hitRate < this.speedValue) {
+        this.config.isAutoRepeat = true;
+        this.config.repeatCountTotal++;
+        this.config.save();
+      } else {
+        this.config.isAutoRepeat = false;
       }
       if (this.config.isAutoNext) {
         // 自动发文
@@ -1025,6 +1060,10 @@ define([
       // OPTION
       $(".chapter-current").innerText = this.config.chapter;
       $(".chapter-total").innerText = this.config.chapterTotal;
+    }
+
+    limitSpeed() {
+      this.speedValue = $("select#speed").value;
     }
   }
 

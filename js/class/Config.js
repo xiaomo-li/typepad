@@ -33,6 +33,8 @@ define(["Article", "ArticleType"], function (Article, ArticleType) {
         //错字练习
         this.wrongContent = config.wrongContent || "";
         this.wrongWords = config.wrongWords || "";
+        this.keystroke = config.keystroke || 4;
+        this.challenge = config.challenge || false;
       } else {
         this.chapter = 1; // 当前段号
         this.chapterTotal = 1; // 总段数
@@ -58,6 +60,8 @@ define(["Article", "ArticleType"], function (Article, ArticleType) {
         this.isBigCharacter = false;
         this.wrongContent = "";
         this.wrongWords = "";
+        this.keystroke = 4;
+        this.challenge = false;
       }
 
       // 更新处理

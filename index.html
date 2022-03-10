@@ -167,6 +167,17 @@
               <label class="switch" for="bigCharacter"></label>
             </div>
           </div>
+          <div class="switch-item">
+            <div class="label">挑战模式</div>
+            <div class="wrapper">
+              <input
+                id="challenge"
+                type="checkbox"
+                onchange="engine.challenge()"
+              />
+              <label class="switch" for="challenge"></label>
+            </div>
+          </div>
         </div>
 
         <!--keys-->
@@ -376,6 +387,15 @@
           <div class="btn-group">
             <div class="btn" onclick="engine.downLoad()">下载错字</div>
             <!-- <div class="btn" onclick="engine.clearWrong()">清空错字</div> -->
+          </div>
+
+          <div id="chooseSpeed" class="btn-group hidden">
+            <label for="speed"></label>
+            <select class="btn" id="speed" onchange="engine.limitSpeed()">
+              <option value="4">击键：4</option>
+              <option value="5">击键：5</option>
+              <option value="6">击键：6</option>
+            </select>
           </div>
 
           <div class="btn-group hidden" id="panelRepeatController">
