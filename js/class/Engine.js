@@ -56,7 +56,6 @@ define([
       Article.hard.content = this.config.wrongContent;
       this.showWrongWords();
       this.lastTypedWords = "";
-      this.speedValue = 4;
 
       // 按键过滤器
       /****
@@ -164,7 +163,6 @@ define([
       });
       $("select#article").value = this.config.articleIdentifier;
       $("select#speed").value = this.config.keystroke;
-
       // English Mode
       if (this.config.isInEnglishMode) {
         this.englishModeEnter();
@@ -172,6 +170,8 @@ define([
 
       // Repeat Status
       this.setRepeatStatus(this.config);
+
+      this.setChallengeStatus();
 
       // Dark Mode
       let body = $("body");
@@ -480,14 +480,18 @@ define([
 
     challenge() {
       this.config.challenge = $("#challenge").checked;
+      this.setChallengeStatus();
+      $("#autoNext").checked = true;
+      this.autoNext();
+      this.config.save();
+    }
+
+    setChallengeStatus() {
       if (this.config.challenge) {
         $("#chooseSpeed").classList.remove("hidden");
       } else {
         $("#chooseSpeed").classList.add("hidden");
       }
-      $("#autoNext").checked = true;
-      this.autoNext();
-      this.config.save();
     }
 
     // 更新重复状态
@@ -975,7 +979,7 @@ define([
         this.config.save();
         this.applyConfig();
       }
-      if (this.record.hitRate < this.speedValue) {
+      if (this.record.hitRate < this.config.keystroke) {
         this.config.isAutoRepeat = true;
         this.config.repeatCountTotal++;
         this.config.save();
@@ -1063,7 +1067,7 @@ define([
     }
 
     limitSpeed() {
-      this.speedValue = $("select#speed").value;
+      this.config.keystroke = $("select#speed").value;
     }
   }
 
