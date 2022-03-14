@@ -56,7 +56,9 @@ define([
       Article.hard.content = this.config.wrongContent;
       this.showWrongWords();
       this.lastTypedWords = "";
-
+      if (this.config.chapter == 0) {
+        this.config.chapter++;
+      }
       // 按键过滤器
       /****
        **** ⌘ + Y F3: 重打当前段
@@ -331,7 +333,6 @@ define([
         optionHtml += tempHtml;
       }
       $("#article").innerHTML = optionHtml;
-      ``;
     }
 
     // 改变文章内容
@@ -344,7 +345,6 @@ define([
         articleName: this.config.articleName,
         articleType: this.config.articleType,
       };
-      Article.hard.content = this.config.wrongContent;
       this.config.articleIdentifier = articleName;
       this.config.articleName = article.name;
       this.config.articleType = article.type;
@@ -379,7 +379,11 @@ define([
             this.config.articleType = lastConfig.articleType;
             editor.show(this.config);
           } else {
-            this.config.article = this.config.customizedContent;
+            this.config.article = this.config.customizedContent.replace(
+              /\n/g,
+              ""
+            );
+
             this.currentOriginWords = this.config.article.split("");
             this.config.articleName = this.config.customizedTitle;
             this.englishModeLeave();
@@ -430,7 +434,6 @@ define([
       } else {
         this.config.chapterTotal = originTol > tempTol ? tempTol + 1 : tempTol;
       }
-
       this.config.save(); // save this.config
       this.reset();
       this.updateInfo();
@@ -727,7 +730,7 @@ define([
         }
       }
       let a = words.replace(
-        /\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?|\。|\?|\！|\？|\“|\”|\’|\‘|\，|\》|\《|\、/g,
+        /\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?|\。|\?|\！|\？|\“|\”|\’|\‘|\，|\》|\《|\、|\n|[a-zA-Z]|\s+|\：/g,
         ""
       );
       this.config.wrongContent += a;
@@ -813,15 +816,6 @@ define([
       });
       saveAs(file);
     }
-
-    // clearWrong() {
-    //   Article.hard.content = this.config.wrongContent = "";
-    //   if (this.config.articleName == "错字练习") {
-    //     template.innerText = "";
-    //   }
-    //   $(".wrong-info").innerHTML = '<div class="title">错字排行<div>';
-    //   this.config.save();
-    // }
 
     getCurrentCETWordTranslation(length) {
       let tempString = "";
@@ -968,23 +962,18 @@ define([
       this.database.insert(this.record, this.config);
       //练习模式——删除打完的错字
       this.lastTypedWords = "";
-      if (this.config.articleName == "错字练习") {
-        let l1 = this.currentWords.length;
-        let l2 = this.config.wrongContent.length;
-        let l3 = this.config.article.length;
-        this.config.wrongContent = this.config.wrongContent.slice(l1, l2);
-        this.config.article = this.config.article.slice(l1, l3);
-        this.currentOriginWords = this.currentOriginWords.slice(l1, l3);
-        this.config.chapter = 0;
-        this.config.save();
-        this.applyConfig();
-      }
-      if (this.record.hitRate < this.config.keystroke) {
-        this.config.isAutoRepeat = true;
-        this.config.repeatCountTotal++;
-        this.config.save();
-      } else {
-        this.config.isAutoRepeat = false;
+      let l1 = this.currentWords.length;
+      let l2 = this.config.wrongContent.length;
+      let l3 = this.config.article.length;
+      //挑战模式
+      if (this.config.challenge) {
+        if (this.record.hitRate < this.config.keystroke) {
+          this.config.isAutoRepeat = true;
+          this.config.repeatCountTotal++;
+          this.config.save();
+        } else {
+          this.config.isAutoRepeat = false;
+        }
       }
       if (this.config.isAutoNext) {
         // 自动发文
@@ -1005,8 +994,27 @@ define([
           }
         } else {
           this.config.repeatCountCurrent = 1;
+          if (this.config.articleName == "错字练习") {
+            this.config.wrongContent = this.config.wrongContent.slice(l1, l2);
+            this.config.article = this.config.article.slice(l1, l3);
+            this.currentOriginWords = this.currentOriginWords.slice(l1, l3);
+            this.config.chapter = 0;
+            this.currentOriginWords = this.config.article =
+              this.config.wrongContent;
+            this.config.save();
+            this.applyConfig();
+          }
           this.nextChapter();
         }
+      } else if (this.config.articleName == "错字练习") {
+        this.config.wrongContent = this.config.wrongContent.slice(l1, l2);
+        this.config.article = this.config.article.slice(l1, l3);
+        this.currentOriginWords = this.currentOriginWords.slice(l1, l3);
+        this.config.chapter = 0;
+        this.currentOriginWords = this.config.article =
+          this.config.wrongContent;
+        this.config.save();
+        this.applyConfig();
       }
       this.updateInfo();
     }
