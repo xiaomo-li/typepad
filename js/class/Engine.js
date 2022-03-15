@@ -492,8 +492,10 @@ define([
     setChallengeStatus() {
       if (this.config.challenge) {
         $("#chooseSpeed").classList.remove("hidden");
+        $("#panelRepeatCurrent").classList.add("hidden");
       } else {
         $("#chooseSpeed").classList.add("hidden");
+        $("#panelRepeatCurrent").classList.remove("hidden");
       }
     }
 
@@ -1003,6 +1005,8 @@ define([
               this.config.wrongContent;
             this.config.save();
             this.applyConfig();
+            this.changePerCount();
+            this.showWrongWords();
           }
           this.nextChapter();
         }
@@ -1015,6 +1019,8 @@ define([
           this.config.wrongContent;
         this.config.save();
         this.applyConfig();
+        this.changePerCount();
+        this.showWrongWords();
       }
       this.updateInfo();
     }
