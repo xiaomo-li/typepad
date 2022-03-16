@@ -35,6 +35,7 @@ define(["Article", "ArticleType"], function (Article, ArticleType) {
         this.wrongWords = config.wrongWords || "";
         this.keystroke = config.keystroke || 4;
         this.challenge = config.challenge || false;
+        this.practice = config.practice || false;
       } else {
         this.chapter = 1; // 当前段号
         this.chapterTotal = 1; // 总段数
@@ -62,6 +63,7 @@ define(["Article", "ArticleType"], function (Article, ArticleType) {
         this.wrongWords = "";
         this.keystroke = 4;
         this.challenge = false;
+        this.practice = false;
       }
 
       // 更新处理

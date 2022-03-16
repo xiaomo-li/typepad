@@ -113,6 +113,28 @@
             </div>
           </div>
           <div class="switch-item">
+            <div class="label">大单字</div>
+            <div class="wrapper">
+              <input
+                id="bigCharacter"
+                type="checkbox"
+                onchange="engine.bigCharacter()"
+              />
+              <label class="switch" for="bigCharacter"></label>
+            </div>
+          </div>
+          <div class="switch-item" id="panelPractice">
+            <div class="label">错字练习</div>
+            <div class="wrapper">
+              <input
+                id="practice"
+                type="checkbox"
+                onchange="engine.practice()"
+              />
+              <label class="switch" for="practice"></label>
+            </div>
+          </div>
+          <div class="switch-item" id="panelshuffleMode">
             <div class="label">全文乱序</div>
             <div class="wrapper">
               <input
@@ -123,7 +145,7 @@
               <label class="switch" for="shuffleMode"></label>
             </div>
           </div>
-          <div class="switch-item">
+          <div class="switch-item" id="panelAutoNext">
             <div class="label">自动发文</div>
             <div class="wrapper">
               <input
@@ -156,18 +178,7 @@
               <label class="switch" for="shuffleRepeat"></label>
             </div>
           </div>
-          <div class="switch-item">
-            <div class="label">大单字</div>
-            <div class="wrapper">
-              <input
-                id="bigCharacter"
-                type="checkbox"
-                onchange="engine.bigCharacter()"
-              />
-              <label class="switch" for="bigCharacter"></label>
-            </div>
-          </div>
-          <div class="switch-item">
+          <div class="switch-item" id="panelChallenge">
             <div class="label">挑战模式</div>
             <div class="wrapper">
               <input
@@ -427,7 +438,7 @@
               </div>
             </div>
           </div>
-          <div class="btn-group">
+          <div class="btn-group" id="articleList">
             <label class="hidden" for="article"></label>
             <select
               class="btn"

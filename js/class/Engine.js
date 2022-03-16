@@ -56,9 +56,6 @@ define([
       Article.hard.content = this.config.wrongContent;
       this.showWrongWords();
       this.lastTypedWords = "";
-      if (this.config.chapter == 0) {
-        this.config.chapter++;
-      }
       // 按键过滤器
       /****
        **** ⌘ + Y F3: 重打当前段
@@ -152,6 +149,7 @@ define([
       $("input[type=checkbox]#autoNext").checked = this.config.isAutoNext;
       $("input[type=checkbox]#autoRepeat").checked = this.config.isAutoRepeat;
       $("input[type=checkbox]#challenge").checked = this.config.challenge;
+      $("input[type=checkbox]#practice").checked = this.config.practice;
       $("input[type=checkbox]#shuffleRepeat").checked =
         this.config.isShuffleRepeat;
       $("input[type=checkbox]#bigCharacter").checked =
@@ -174,6 +172,8 @@ define([
       this.setRepeatStatus(this.config);
 
       this.setChallengeStatus();
+      this.setPracticeStatus();
+      this.showWrongWords();
 
       // Dark Mode
       let body = $("body");
@@ -191,7 +191,11 @@ define([
       // Repeat Monitor
       $("#repeatCountTotal").innerText = this.config.repeatCountTotal;
       $("#repeatCountCurrent").innerText = this.config.repeatCountCurrent;
-      this.currentOriginWords = this.config.article.split("");
+      if (this.config.practice) {
+        this.currentOriginWords = Article.hard.content.split("");
+      } else {
+        this.currentOriginWords = this.config.article.split("");
+      }
       if (this.config.articleType === ArticleType.word) {
         // CET 时
         this.arrayWordAll = Article.CET4.getWordsArray();
@@ -325,6 +329,7 @@ define([
         let tempHtml = "";
         if (article.type === ArticleType.customize) {
           tempHtml = `<option value="${itemName}">${this.config.customizedTitle}</option>`;
+        } else if (article.value == "hard") {
         } else {
           tempHtml = `<option value="${itemName}">${ArticleType.getTypeNameWith(
             article.type
@@ -393,13 +398,16 @@ define([
           break;
       }
       this.lastTypedWords = "";
+      this.changeRepeatCount();
       this.config.save();
       this.applyConfig();
       this.changePerCount();
     }
 
     // 改变重复次数
-    changeRepeatCount() {}
+    changeRepeatCount() {
+      this.config.repeatCountCurrent = 1;
+    }
 
     // 改变数字时
     changePerCount() {
@@ -434,6 +442,7 @@ define([
       } else {
         this.config.chapterTotal = originTol > tempTol ? tempTol + 1 : tempTol;
       }
+      this.changeRepeatCount();
       this.config.save(); // save this.config
       this.reset();
       this.updateInfo();
@@ -481,6 +490,35 @@ define([
       this.config.save();
     }
 
+    //错字练习
+    practice() {
+      this.config.practice = $("#practice").checked;
+      this.setPracticeStatus();
+      this.config.save();
+      this.applyConfig();
+      this.changePerCount();
+    }
+
+    setPracticeStatus() {
+      if (this.config.practice) {
+        $("#panelRepeatCurrent").classList.add("hidden");
+        $("#panelAutoNext").classList.add("hidden");
+        $("#panelRepeatShuffle").classList.add("hidden");
+        $("#panelChallenge").classList.add("hidden");
+        $("#articleList").classList.add("hidden");
+        $("#panelshuffleMode").classList.add("hidden");
+      } else {
+        $("#panelRepeatCurrent").classList.remove("hidden");
+        $("#panelAutoNext").classList.remove("hidden");
+        $("#panelChallenge").classList.remove("hidden");
+        $("#panelRepeatShuffle").classList.remove("hidden");
+        $("#articleList").classList.remove("hidden");
+        $("#panelshuffleMode").classList.remove("hidden");
+        this.reset();
+      }
+      this.setRepeatStatus(this.config);
+    }
+
     challenge() {
       this.config.challenge = $("#challenge").checked;
       this.setChallengeStatus();
@@ -492,16 +530,21 @@ define([
     setChallengeStatus() {
       if (this.config.challenge) {
         $("#chooseSpeed").classList.remove("hidden");
+        $("#panelRepeatShuffle").classList.add("hidden");
+        $("#panelPractice").classList.add("hidden");
         $("#panelRepeatCurrent").classList.add("hidden");
       } else {
         $("#chooseSpeed").classList.add("hidden");
+        $("#panelRepeatShuffle").classList.remove("hidden");
+        $("#panelPractice").classList.remove("hidden");
         $("#panelRepeatCurrent").classList.remove("hidden");
       }
+      this.setRepeatStatus(this.config);
     }
 
     // 更新重复状态
     setRepeatStatus(config) {
-      if (config.isAutoRepeat) {
+      if (config.isAutoRepeat && !config.practice && !config.challenge) {
         $("#panelRepeatController").classList.remove("hidden");
         $("#panelRepeatShuffle").classList.remove("hidden");
       } else {
@@ -809,6 +852,7 @@ define([
       }
       $(".wrong-info").innerHTML = innerHTML;
       this.wrong = wrongwords;
+      Article.hard.content = this.config.wrongContent;
     }
 
     // 下载txt
@@ -922,6 +966,20 @@ define([
       }
     }
 
+    deleteWords() {
+      let l1 = this.currentWords.length;
+      let l2 = this.config.wrongContent.length;
+      let l3 = Article.hard.content.length;
+      this.config.wrongContent = this.config.wrongContent.slice(l1, l2);
+      Article.hard.content = Article.hard.content.slice(l1, l3);
+      this.currentOriginWords = this.currentOriginWords.slice(l1, l3);
+      this.config.chapter = 0;
+      this.config.save();
+      this.applyConfig();
+      this.changePerCount();
+      this.showWrongWords();
+    }
+
     // 重置计数器
     reset() {
       this.record = new Record();
@@ -964,9 +1022,9 @@ define([
       this.database.insert(this.record, this.config);
       //练习模式——删除打完的错字
       this.lastTypedWords = "";
-      let l1 = this.currentWords.length;
-      let l2 = this.config.wrongContent.length;
-      let l3 = this.config.article.length;
+      if (this.config.practice) {
+        this.deleteWords();
+      }
       //挑战模式
       if (this.config.challenge) {
         if (this.record.hitRate < this.config.keystroke) {
@@ -977,9 +1035,9 @@ define([
           this.config.isAutoRepeat = false;
         }
       }
-      if (this.config.isAutoNext) {
+      if (this.config.isAutoNext && !this.config.practice) {
         // 自动发文
-        if (this.config.isAutoRepeat) {
+        if (this.config.isAutoRepeat && !this.config.challenge) {
           // 重复发文
           if (this.config.repeatCountTotal > this.config.repeatCountCurrent) {
             // 还有重复次数
@@ -996,31 +1054,8 @@ define([
           }
         } else {
           this.config.repeatCountCurrent = 1;
-          if (this.config.articleName == "错字练习") {
-            this.config.wrongContent = this.config.wrongContent.slice(l1, l2);
-            this.config.article = this.config.article.slice(l1, l3);
-            this.currentOriginWords = this.currentOriginWords.slice(l1, l3);
-            this.config.chapter = 0;
-            this.currentOriginWords = this.config.article =
-              this.config.wrongContent;
-            this.config.save();
-            this.applyConfig();
-            this.changePerCount();
-            this.showWrongWords();
-          }
           this.nextChapter();
         }
-      } else if (this.config.articleName == "错字练习") {
-        this.config.wrongContent = this.config.wrongContent.slice(l1, l2);
-        this.config.article = this.config.article.slice(l1, l3);
-        this.currentOriginWords = this.currentOriginWords.slice(l1, l3);
-        this.config.chapter = 0;
-        this.currentOriginWords = this.config.article =
-          this.config.wrongContent;
-        this.config.save();
-        this.applyConfig();
-        this.changePerCount();
-        this.showWrongWords();
       }
       this.updateInfo();
     }
