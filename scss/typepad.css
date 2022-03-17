@@ -775,6 +775,7 @@ label.btn,
   -webkit-border-radius: 6px;
   -moz-border-radius: 6px;
   border-radius: 6px;
+  max-height: 873px;
 }
 
 .table {
@@ -1498,4 +1499,11 @@ body {
   .full-screen {
     display: none;
   }
+}
+.wrong-info {
+  max-height: 250px;
+  overflow: auto;
+}
+.wrong-info .title {
+  text-align: center;
 }

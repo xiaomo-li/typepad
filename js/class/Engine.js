@@ -604,11 +604,10 @@ define([
         this.config.article = this.currentOriginWords.join("");
         let count =
           this.config.count === "ALL"
-            ? this.arrayWordAll.length
+            ? this.currentOriginWords.length
             : Number(this.config.count);
         this.currentWords = this.currentOriginWords.slice(0, count).join("");
       }
-
       this.config.chapter = 1;
       this.config.save(); // save this.config
       this.reset();
