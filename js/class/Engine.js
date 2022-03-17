@@ -622,7 +622,7 @@ define([
       let arrayTyped = typedWords.split("");
       let html = "";
       let wordsCorrect = "";
-      let wordsWrong = "";
+      let wordsWrong = 0;
       let tempCharacterLength = 0; // 单字或汉字文章时，未上屏结尾英文的长度
       let result = [];
       result.push({
@@ -726,6 +726,7 @@ define([
               .slice(item.start, item.words.length + item.start)
               .join("");
             html = html + `<span class="wrong">${originWords}</span>`;
+            wordsWrong += wordsWrong + originWords.length;
             break;
           case ResultType.pending:
             if (index < result.length - 1) {
@@ -739,7 +740,14 @@ define([
             break;
         }
       });
-
+      //显示当前文本中有多少错字
+      if (wordsWrong > 0) {
+        $("#showErrors").classList.remove("hidden");
+        $("#showErrors div span").innerHTML = wordsWrong;
+      } else {
+        $("#showErrors").classList.add("hidden");
+        $("#showErrors div span").innerHTML = "";
+      }
       let theLastResult = result[result.length - 1];
       let logLength = theLastResult.start + theLastResult.words.length; // 已上屏记录的长度
 

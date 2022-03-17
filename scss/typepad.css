@@ -1507,3 +1507,16 @@ body {
 .wrong-info .title {
   text-align: center;
 }
+
+.showErrors .btn {
+  height: 25px;
+  display: flex;
+  align-items: center;
+}
+.showErrors img {
+  border-right: 0;
+  height: 100%;
+}
+.showErrors span {
+  padding-left: 5px;
+}
