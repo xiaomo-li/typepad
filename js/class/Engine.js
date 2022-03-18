@@ -174,6 +174,7 @@ define([
       this.setChallengeStatus();
       this.setPracticeStatus();
       this.showWrongWords();
+      this.showErrors(0);
 
       // Dark Mode
       let body = $("body");
@@ -740,14 +741,9 @@ define([
             break;
         }
       });
-      //显示当前文本中有多少错字
-      if (wordsWrong > 0) {
-        $("#showErrors").classList.remove("hidden");
-        $("#showErrors div span").innerHTML = wordsWrong;
-      } else {
-        $("#showErrors").classList.add("hidden");
-        $("#showErrors div span").innerHTML = "";
-      }
+
+      this.showErrors(wordsWrong);
+
       let theLastResult = result[result.length - 1];
       let logLength = theLastResult.start + theLastResult.words.length; // 已上屏记录的长度
 
@@ -860,6 +856,17 @@ define([
       $(".wrong-info").innerHTML = innerHTML;
       this.wrong = wrongwords;
       Article.hard.content = this.config.wrongContent;
+    }
+
+    //显示当前文本中有多少错字
+    showErrors(errors) {
+      if (errors > 0) {
+        $("#showErrors").classList.remove("hidden");
+        $("#showErrors div span").innerHTML = errors;
+      } else {
+        $("#showErrors").classList.add("hidden");
+        $("#showErrors div span").innerHTML = "";
+      }
     }
 
     // 下载txt
