@@ -55,6 +55,7 @@ define([
       this.wrong = "";
       Article.hard.content = this.config.wrongContent;
       this.showWrongWords();
+      this.showPracticeBtn();
       this.lastTypedWords = "";
       // 按键过滤器
       /****
@@ -127,6 +128,9 @@ define([
         if (!this.isFinished && this.isStarted) {
           this.compare();
           this.getWrongWords();
+          if (!this.config.challenge) {
+            this.showPracticeBtn();
+          }
           this.showWrongWords();
           this.config.save();
           // 末字时结束的时候
@@ -499,6 +503,15 @@ define([
       this.applyConfig();
       this.changePerCount();
     }
+    showPracticeBtn() {
+      if (this.config.wrongContent == "") {
+        $("#panelPractice").classList.add("hidden");
+        $("input[type=checkbox]#practice").checked =
+          this.config.practice = false;
+      } else {
+        $("#panelPractice").classList.remove("hidden");
+      }
+    }
 
     setPracticeStatus() {
       if (this.config.practice) {
@@ -537,7 +550,7 @@ define([
       } else {
         $("#chooseSpeed").classList.add("hidden");
         $("#panelRepeatShuffle").classList.remove("hidden");
-        $("#panelPractice").classList.remove("hidden");
+        this.showPracticeBtn();
         $("#panelRepeatCurrent").classList.remove("hidden");
       }
       this.setRepeatStatus(this.config);
