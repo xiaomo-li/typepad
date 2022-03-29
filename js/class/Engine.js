@@ -639,6 +639,7 @@ define([
       let wordsWrong = 0;
       let tempCharacterLength = 0; // 单字或汉字文章时，未上屏结尾英文的长度
       let result = [];
+      let wrongResult = [];
       result.push({
         type: ResultType.correct,
         words: "",
@@ -739,6 +740,7 @@ define([
             let originWords = arrayOrigin
               .slice(item.start, item.words.length + item.start)
               .join("");
+            wrongResult.push(item);
             html = html + `<span class="wrong">${originWords}</span>`;
             wordsWrong += wordsWrong + originWords.length;
             break;
@@ -770,6 +772,12 @@ define([
       let offsetTop = $("." + untypedStringClassName).offsetTop;
       templateWrapper.scrollTo(0, offsetTop - HEIGHT_TEMPLATE / 2);
 
+      //自动对焦错字
+      let r = $(".typing .text");
+      if (arrayTyped.length == arrayOrigin.length && wordsWrong > 0) {
+        let item = wrongResult[0];
+        r.setSelectionRange(item.start, item.start + item.words.length);
+      }
       if (this.config.articleType === ArticleType.word) {
         // 获取单词释义
         this.getCurrentCETWordTranslation(arrayTyped.length);
