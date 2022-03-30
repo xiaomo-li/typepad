@@ -656,6 +656,7 @@ define([
         originCharacter = originCharacter ? originCharacter : " "; // 当输入编码多于原字符串时，可能会出现 undefined 字符，这个用于消除它
         let currentCharacterIsCorrect = currentCharacter === originCharacter;
         let currentCharacterIsEnglish = /[a-zA-Z]/i.test(currentCharacter);
+		let currentCharacterIsPending =/[_ ]/i.test(currentCharacter)
         // 筛选每个字
         let lastResult = result[result.length - 1];
         if (
@@ -700,7 +701,7 @@ define([
               });
             }
             tempCharacterLength = 0; // 清零前方记录的临时英文编码
-          } else if (currentCharacterIsEnglish) {
+          } else if (currentCharacterIsEnglish || currentCharacterIsPending) {
             // 错误且是英文时，隐藏不显示
             tempCharacterLength++;
             if (lastResult.type === ResultType.pending) {
@@ -787,7 +788,11 @@ define([
     getWrongWords() {
       let arrayOrigin = this.currentWords.split(""); //系统出的尾字
       let words = "";
-      if (this.lastTypedWords !== "") {
+	  let arrayTyped = typingPad.value.split('')
+	  let isWord = arrayTyped[arrayTyped.length-1] 
+	  
+	  if(isWord!==" "){ //排除输入法的占位符
+      if (this.lastTypedWords !== ""  ) {
         let d = this.dmp.diff_main(this.lastTypedWords, typingPad.value);
         words += this.simplediff(d) ? this.simplediff(d) : "";
       } else {
@@ -798,8 +803,9 @@ define([
           }
         }
       }
+	  }
       let a = words.replace(
-        /\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?|\。|\?|\！|\？|\“|\”|\’|\‘|\，|\》|\《|\、|\n|[a-zA-Z]|\s+|\：/g,
+        /\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?|\。|\?|\！|\？|\“|\”|\’|\‘|\，|\》|\《|\、|\n|[a-zA-Z]|\s+|\：| /g,
         ""
       );
       this.config.wrongContent += a;
