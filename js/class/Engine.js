@@ -1078,7 +1078,7 @@ define([
       }
       if (this.config.isAutoNext && !this.config.practice) {
         // 自动发文
-        if (this.config.isAutoRepeat && !this.config.challenge) {
+        if (this.config.isAutoRepeat ) {
           // 重复发文
           if (this.config.repeatCountTotal > this.config.repeatCountCurrent) {
             // 还有重复次数
