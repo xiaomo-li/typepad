@@ -4,7 +4,7 @@
 <img width="150" src="img/logo.png"/>
 
 ## 线上地址
-[https://kylebing.cn/tools/typepad/](https://kylebing.cn/tools/typepad/)
+[https://xiaomo-li.github.io/typepad/](https://xiaomo-li.github.io/typepad/)
 
 
 ### 截图
