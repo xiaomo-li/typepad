@@ -771,8 +771,11 @@ define([
       template.innerHTML = html;
       // 滚动对照区到当前所输入的位置
       let offsetTop = $("." + untypedStringClassName).offsetTop;
+      if (window.innerWidth <= 768) {
+        templateWrapper.scrollTo(0, offsetTop - HEIGHT_TEMPLATE);
+      } else {
       templateWrapper.scrollTo(0, offsetTop - HEIGHT_TEMPLATE / 2);
-
+      }
       //自动对焦错字
       let r = $(".typing .text");
       if (arrayTyped.length == arrayOrigin.length && wordsWrong > 0) {
