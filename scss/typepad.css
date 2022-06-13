@@ -1310,6 +1310,7 @@ body {
     margin-bottom: 5px;
     height: auto;
     overflow-y: scroll;
+    max-height:150px !important;
   }
 }
 
