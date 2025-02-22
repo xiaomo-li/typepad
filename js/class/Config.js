@@ -37,6 +37,9 @@ define(['Article', 'ArticleType'],function (Article, ArticleType) {
                this.customizedTitle      = config.customizedTitle || '';
                // v2.43 大单字练习模式
                this.isBigCharacter       = config.isBigCharacter;
+               // 挑战模式
+               this.keystroke = config.keystroke || 4;
+               this.challenge = config.challenge || false;
                // v2.61 新历史记录样式
                this.isHistoryInListMode  = config.isHistoryInListMode;
                // v2.65
@@ -54,7 +57,7 @@ define(['Article', 'ArticleType'],function (Article, ArticleType) {
             this.chapterTotal         = initChapterAmount;      // 总段数
             this.isShuffle            = false;                  // 是否乱序模式
             this.isInEnglishMode      = false;                  // 是否处于英文打字状态
-            this.count                = '15';                   // 单条数量
+            this.count                = '10';                   // 单条数量
             this.articleName          = Article.top500.name;    // 文章名称
             this.articleIdentifier    = 'top500';               // 文章标识
             this.article              = Article.top500.content; // 文章内容
@@ -74,6 +77,9 @@ define(['Article', 'ArticleType'],function (Article, ArticleType) {
             this.isBigCharacter       = false;
             // v2.61 新历史记录样式
             this.isHistoryInListMode  = false;
+            // 挑战模式
+            this.keystroke = 4;
+            this.challenge = false;
          }
       }
       save(){

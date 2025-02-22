@@ -135,6 +135,7 @@ define(
          $('input[type=checkbox]#darkMode').checked = this.config.darkMode;
          $('input[type=checkbox]#autoNext').checked = this.config.isAutoNext;
          $('input[type=checkbox]#autoRepeat').checked = this.config.isAutoRepeat;
+         $("input[type=checkbox]#challenge").checked = this.config.challenge;
          $('input[type=checkbox]#shuffleRepeat').checked = this.config.isShuffleRepeat;
          $('input[type=checkbox]#bigCharacter').checked = this.config.isBigCharacter;
          $('input[type=checkbox]#historyListMode').checked = this.config.isHistoryInListMode;
@@ -144,7 +145,7 @@ define(
             item.checked = item.value === this.config.count
          })
          $('select#article').value = this.config.articleIdentifier;
-
+         $("select#speed").value = this.config.keystroke;
          // English Mode
          if (this.config.isInEnglishMode) {
             this.englishModeEnter()
@@ -161,6 +162,7 @@ define(
 
          // Repeat Status
          this.setRepeatStatus(this.config);
+         this.setChallengeStatus();
 
          // Dark Mode
          let body = $('body');
@@ -510,6 +512,28 @@ define(
          this.config.isBigCharacter ? enterBigCharacterMode() : leaveBigCharacterMode();
          this.config.save();
       }
+      
+      // 挑战模式
+      challenge() {
+         this.config.challenge = $("#challenge").checked;
+         this.setChallengeStatus();
+         $("#autoNext").checked = true;
+         this.autoNext();
+         this.config.save();
+       }
+
+       setChallengeStatus() {
+         if (this.config.challenge) {
+           $("#chooseSpeed").classList.remove("hidden");
+           $("#panelRepeatShuffle").classList.add("hidden");
+           $("#panelRepeatCurrent").classList.add("hidden");
+         } else {
+           $("#chooseSpeed").classList.add("hidden");
+           $("#panelRepeatShuffle").classList.remove("hidden");
+           $("#panelRepeatCurrent").classList.remove("hidden");
+         }
+         this.setRepeatStatus(this.config);
+       }
 
       // 历史记录显示样式： list | table
       historyListMode(){
@@ -526,7 +550,7 @@ define(
 
       // 更新重复状态
       setRepeatStatus(config){
-         if (config.isAutoRepeat){
+         if (config.isAutoRepeat && !config.challenge){
             $('#panelRepeatController').classList.remove('hidden');
             $('#panelRepeatShuffle').classList.remove('hidden');
          } else {
@@ -887,6 +911,18 @@ define(
          // console.log(this.record, this.config)
          this.database.insert(this.record, this.config);
 
+
+         //挑战模式
+         if (this.config.challenge) {
+            if (this.record.hitRate < this.config.keystroke) {
+               this.config.isAutoRepeat = true;
+               this.config.repeatCountTotal++;
+               this.config.save();
+            } else {
+               this.config.isAutoRepeat = false;
+            }
+         }
+
          //
          // 保存记录到 SCORE
          //
@@ -1151,6 +1187,10 @@ define(
       clearScoreOf(typeOfScore){
          this.score.clearScoreFor(this.config.articleType, typeOfScore)
          this.updateInfo()
+      }
+
+      limitSpeed() {
+         this.config.keystroke = $("select#speed").value;
       }
    }
 
