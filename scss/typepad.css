@@ -768,7 +768,11 @@ input[type=radio]:checked + label {
 input[type=radio]:checked + label:hover {
   background-color: #ffa01a;
 }
-
+.btn-group.active .btn{
+  font-weight: bold;
+  background-color: #ff9500;
+  color: white !important;
+}
 label.btn, .btn-group .btn-vertical > label {
   min-width: 30px;
   text-align: center;

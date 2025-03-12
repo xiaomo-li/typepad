@@ -150,7 +150,6 @@ define(
          if (this.config.isInEnglishMode) {
             this.englishModeEnter()
          }
-
          // History Mode: LIST | TABLE
          if (this.config.isHistoryInListMode){
             $('.record-container').classList.remove('hidden')
@@ -158,6 +157,13 @@ define(
          } else {
             $('.table-container').classList.remove('hidden')
             $('.record-container').classList.add('hidden')
+         }
+
+         // 回退
+         if (this.config.isBackspace){
+            $("#backspace").classList.add('active')
+         } else {
+            $("#backspace").classList.remove('active')
          }
 
          // Repeat Status
@@ -522,18 +528,31 @@ define(
          this.config.save();
        }
 
+      // 挑战模式的UI显示
        setChallengeStatus() {
          if (this.config.challenge) {
            $("#chooseSpeed").classList.remove("hidden");
            $("#panelRepeatShuffle").classList.add("hidden");
            $("#panelRepeatCurrent").classList.add("hidden");
+           $("#backspace").classList.remove("hidden")
          } else {
            $("#chooseSpeed").classList.add("hidden");
            $("#panelRepeatShuffle").classList.remove("hidden");
            $("#panelRepeatCurrent").classList.remove("hidden");
+           $("#backspace").classList.add("hidden")
          }
          this.setRepeatStatus(this.config);
        }
+
+      //  挑战模式_回退模式
+      changeBackspace(){
+         this.config.isBackspace = !this.config.isBackspace;  
+         if (this.config.isBackspace){
+            $("#backspace").classList.add('active')
+         } else {
+            $("#backspace").classList.remove('active')
+         }
+      }
 
       // 历史记录显示样式： list | table
       historyListMode(){
@@ -914,7 +933,7 @@ define(
 
          //挑战模式
          if (this.config.challenge) {
-            if (this.record.hitRate < this.config.keystroke) {
+            if (this.record.hitRate < this.config.keystroke || (this.config.isBackspace && this.record.backspace > 0) ) {
                this.config.isAutoRepeat = true;
                this.config.repeatCountTotal++;
                this.config.save();

@@ -80,7 +80,9 @@ define(['Article', 'ArticleType'],function (Article, ArticleType) {
             // 挑战模式
             this.keystroke = 4;
             this.challenge = false;
-         }
+            // 回退
+            this.isBackspace = false;
+         } 
       }
       save(){
          localStorage.setItem(CONFIG_NAME, JSON.stringify(this));
